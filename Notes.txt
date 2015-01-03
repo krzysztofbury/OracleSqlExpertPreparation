@@ -6,3 +6,72 @@ Non-Schema objects: Users, Roles, Public Synonyms (synonyms in special PUBLIC us
 
 CREATE objectType (besides CONSTRAINT) objectName attributes (from 0 to unlimited);
 
+Naming Conventions
+* Between 1 and 30 characters
+* First character must be a letter
+* Names may include: letters, numbers, $ sign, _ sign, # sign
+* Objects are case insensitive
+- If a name is not enclosed in double quotation marks when it is created, then it will be treated as uppercase regardless of how it is created or referenced;
+- If a name is enclosed in double quotation marks, then it is case sensitive and must always be referenced with case sensitivity and with double quotation marks.
+- By using double quotation marks, you can specify database object names that go beyond the standard naming rules of Oracle objects. But if you do this, you will always need to use double quotation marks in every future reference to that object.
+* objects that share a namespace must have unique names within that namespace
+* Oracle system-defined objects: SYS_, ALL_, DBA_, DV$, NLS_, ROLE_, USER_, V$
+
+Datbase Namespace: Users, Roles, Public Synonyms
+SchemaX Namespace1: Tables, Views, Sequences, Private Synonyms, User-Defined Types
+SchemaX Namespace2: Indexes
+SchemaX Namepsace3: Constraints
+
+/* DATA TYPES */ 
+* LOG (Large Database Objects) cannot be included in a primary key, DISTINCT, GROUP BY, ORDER BY or JOINS
+
+* CHAR(n) - n max is 2000 - fixed-length - if CHAR(5) and we enter A, 4 spaces will be adde 'A    ', n can be ommited than max is being taken
+* VARCHAR2(n) - n max is 4000 bytes(1 char is 1 byte), n must be specified
+* NUMBER(n,m) - n - precision maximum number of significant digits (on either side) n from 1 to 38 default 38, m - scale total number of digits to the right of the decimal point, m range from -84 to 127 default 0
+* DATE - year, month, date, hour, minute and second in single quotation mark. Default format is specified by NLS_DATE_FORMAT
+- Default format DD-MON-RR where RR ranging from 00 to 49 - 21st century and 50 - 99 20th century 
+- ANSI format YYYY-MM-DD
+* TIMESTAMP(n) - n - fractional seconds precision range is from 1-0 default 6
+* TIMESTAMP(n) WITH TIME ZONE - adds region name or an offset for time zone
+* TIMESTAMP(n) WITH LOCAL TIME ZONE - offset is calculated automatically and value is sent in the user's local session time zone
+* INTERVAL YEAR(n) TO MONTH - span of time defines in year and month values useful for stroing the difference between two date values. n is the number of digits used to define the YEAR value n range is 0-9 default is 2.
+* INTERVAL DAY(n1) TO SECOND(n2) - span of time defined in dats, hours, minutes and seconds n1 precision for days range is 0-9 default 2 , n2 precision for seconds range is 0-9 default 6
+* BLOB - Binary Large OBject - large binary data
+* CLOB - Character Large OBject - large text data 
+* NCLOB - CLOB in Unicode - Oracle is recommending the use of Unicode as the database national character set
+
+/* CONSTRAINTS */
+* Constraint is created as part of another statement, such as CREATE TABLE or ALTER TABLE
+- PRIMARY KEY, FOREIGN KEY, NOT NULL, CHECK, UNIQUE and REF
+"In Line" (Anonymous or Declarative) Constraint
+CREATE TABLE PORTS (
+PORT_ID NUMBER PRIMARY KEY);
+or
+CREATE TABLE PORTS (
+PORT_ID NUMBER CONSTRAINT PORT_ID_PK PRIMARY KEY);
+
+"Out of Line" Constraint
+CREATE TABLE PORTS (
+PORT_ID NUMBER,
+PRIMARY KEY (PORT_ID));
+or 
+CREATE TABLE PORTS (
+PORT_ID NUMBER,
+CONSTRAINT PORT_ID_PK PRIMARY_KEY (PORT_ID));
+
+Other Ways of Adding a Constraint
+* ALTER TABLE PORTS MODIFY PORT_ID PRIMARY KEY; - IN LINE
+* ALTER TABLE PORTS MODIFY PORT_ID CONSTRAINT PORT_ID_PK PRIMARY KEY; - IN LINE
+* ALTER TABLE PORTS ADD PRIMARY KEY (PORT_ID); - OUT OF LINE
+* ALTER TABLE PORTS ADD CONSTRAINT PORT_ID_PK PRIMARY KEY (PORT_ID); - OUT OF LINE
+
+!! NOT NULL CONSTRAINT CAN ONLY BE DECLARED BY "IN LINE" DECLARATIONS
+!! UNIQUE constraint by itself, allows NULL values tobe added to the column
+!! FOREIGN KEY referenced table is not actually required to have a PRIMARY KEY but only a UNIQUE constraint on the referenced columns
+!! CHECK any valid SQL expression may be used in a CHECK constraint  
+!! UNIQUE, PRIMARY KEY and FOREIGN KEY constraints can't be set for BLOB, CLOB and TIMESTAMP WITH TIME ZONE data types
+ 
+FOREIGN KEY
+* (... create table) CONSTRAINT SHIPS_PORTS_FK FOREIGN KEY (HOME_PORT_ID) REFERENCES PORTS (PORT_ID));
+- Foreign Key doesn't require value to exist NOT NULL have to specified for such cause
+
