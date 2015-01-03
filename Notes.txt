@@ -1,0 +1,8 @@
+Schema - logical collection of database objects.
+
+2.1 Schema and Non-Schema Database Objects
+Schema objects: Tables, Constraints, Indexes, Views, Sequences, Private Synonyms
+Non-Schema objects: Users, Roles, Public Synonyms (synonyms in special PUBLIC user account)
+
+CREATE objectType (besides CONSTRAINT) objectName attributes (from 0 to unlimited);
+

@@ -1,0 +1,10 @@
+CREATE USER MORB1D IDENTIFIED BY oracle;
+
+GRANT CREATE SESSION TO morb1d;
+GRANT UNLIMITED TABLESPACE TO morb1d;
+GRANT CREATE TABLE TO morb1d;
+
+CREATE TABLE work_schedule (
+work_schedule_id NUMBER,
+start_date		 DATE,
+end_date		 DATE);
