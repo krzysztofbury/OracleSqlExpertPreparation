@@ -75,3 +75,8 @@ FOREIGN KEY
 * (... create table) CONSTRAINT SHIPS_PORTS_FK FOREIGN KEY (HOME_PORT_ID) REFERENCES PORTS (PORT_ID));
 - Foreign Key doesn't require value to exist NOT NULL have to specified for such cause
 
+/* INSERT */
+* If we are inserting data to all of tables columns in the same order as they are in the DB we can ommit inserting columns names into the statement
+* Avoid "implicit datatype conversion", user "explicit datatype conversion"
+
+
