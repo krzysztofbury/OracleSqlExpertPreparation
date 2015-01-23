@@ -1,0 +1,16 @@
+/* MANIPULATING DATA */
+
+INSERT INTO TEST1 VALUES ('a','b','c');
+SAVEPOINT SCN_1;
+ALTER TABLE TEST1 ADD (COLUMN4 VARCHAR2(20));
+ROLLBACK TO SCN_1;
+
+/* We are expecting to get execution error, due to implicit commit made by ALTER statemnt - SAVEPOINT will be removed */
+
+CREATE TABLE ADDRESSES (ID NUMBER, ZONE NUMBER, ZIP_CODE VARCHAR2(5));
+INSERT INTO ADDRESSES (ID, ZONE, ZIP_CODE) VALUES (1, 1, '94065');
+SAVEPOINT ZONE_CHANGE_01;
+UPDATE ADDRESSES SET ZONE = 2 WHERE ZIP_CODE = 94065;
+ROLLBACK;
+
+/* Table will have no rows as rollback doesn't point to valid SAVEPOINT name !!! */

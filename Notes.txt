@@ -66,17 +66,56 @@ Other Ways of Adding a Constraint
 * ALTER TABLE PORTS ADD CONSTRAINT PORT_ID_PK PRIMARY KEY (PORT_ID); - OUT OF LINE
 
 !! NOT NULL CONSTRAINT CAN ONLY BE DECLARED BY "IN LINE" DECLARATIONS
-!! UNIQUE constraint by itself, allows NULL values tobe added to the column
+!! UNIQUE constraint by itself, allows NULL values to be added to the column
 !! FOREIGN KEY referenced table is not actually required to have a PRIMARY KEY but only a UNIQUE constraint on the referenced columns
 !! CHECK any valid SQL expression may be used in a CHECK constraint  
 !! UNIQUE, PRIMARY KEY and FOREIGN KEY constraints can't be set for BLOB, CLOB and TIMESTAMP WITH TIME ZONE data types
  
-FOREIGN KEY
+/* FOREIGN KEY */
 * (... create table) CONSTRAINT SHIPS_PORTS_FK FOREIGN KEY (HOME_PORT_ID) REFERENCES PORTS (PORT_ID));
 - Foreign Key doesn't require value to exist NOT NULL have to specified for such cause
 
 /* INSERT */
 * If we are inserting data to all of tables columns in the same order as they are in the DB we can ommit inserting columns names into the statement
 * Avoid "implicit datatype conversion", user "explicit datatype conversion"
+
+/* DELETE */
+* FROM and WHERE is OPTIONAL !!! DELETE (FROM) <TABLE NAME> (WHERE 1=1);
+
+/* COMMIT, ROLLBACK, SAVEPOINT */
+* Note: even if the DDL statement fails with an execution error (as opposed to a syntax error), the “before” implicit commit is executed and takes effect.
+* If other users have committed any changes during their own respective sessions, those changes are unaffected—the only changes that are rolled back are those changes issued by the user performing the rollback.
+* An implicit rollback occurs when a program abnormally terminates (SQL*Plus or SQL Developer)
+* SAVEPOINT <NAME>, ROLLBACK (WORK) TO <NAME> 
+* If you duplicate a SAVEPOINT name, know that you will not receive a syntax or execution error. Instead, the new SAVEPOINT will simply override the earlier SAVEPOINT, effectively erasing it.
+* Once a commit event occurs—either an explicit or implicit commit event — all existing savepoints are erased from memory. Any references to them by future TCL statements will produce an error code.
+
+/* SELECT */
+* SELECT (1 element valid) 1 FROM <VALID TABLE NAME>;
+* PSEUDOCOLUMNS: ROWNUM (ROWNUM is assigned before the ORDER BY clause is processed!!!), ROWID 
+* UNIQUE = DISTINCT !!
+* Expressions can be used in: SELECT column list, SELECT WHERE / HAVING and ORDER BY clauses, hierarchical queries with CONNECT BY / START WITH or ORDER BY clauses, INSERT VALUES clause, UPDATE SET and WHERE clauses, DELETE WHERE clause
+* ROWNUM is applicated first to result than it is being sorted (ordered)!!!
+* Asterisk can't be used together with any other column in SELECT statement (if it has no alias on)
+
+* Projection - refers to the ability of a SELECT statement to choose a subset of the columns in a given table.
+* Selection - is the ability of a SELECT statement to choose a subset of the rows in a given table.
+* Joining - ability to create relation (joins) between the tables.
+
+/* SYNONYMS */
+* Public - is owned by the system-provided user PUBLIC and when created becomes automatically available to all users in the database
+* Private - is owned by a user account and can be helpful for a variety of reasons
+
+/* WHERE */
+* All that is required is a valid expression on both sides of the comparison operator
+* WhenSQL compares dates, "less than" means "earlier than"
+* !=, <>, ^= all of them are NOT EQUAL operator
+* _ wildcard is representing a single character
+* % is representing zero or more characters
+* Both expression should be the same datatype in order for the comparison to work!!! - SQL can perform an automatic datatype conversion
+* 'A' is less than 'Z', 'Z' is less than 'a', '2' is greater than '10' when comparing characters
+* "later" dates are "greater" dates
+* In Like the string with wildcards must occur after the reserved word LIKE not before (is won't follow syntacticall error but won't work as it should)
+
 
 
