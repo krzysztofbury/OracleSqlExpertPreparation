@@ -41,7 +41,16 @@ RESULTS: 1, NULL
 
 SELECT NULLIF(NULL,NULL) FROM DUAL;
 RESULTS: Syntax Error - NULLIF is doing Expression1 = Expression2, NULL = NULL is not a valid comparison
-  
+
+
+SELECT TO_CHAR(SYSDATE, 'DD-MON-RRRR HH:MM:SS') "Today's Date And Time" FROM DUAL;
+Above query is syntactically correcy but format for mintues should be MI currently for minutes it will show MONTHS
+
+SELECT TO_DSINTERVAL('40 08:30:00.03225') EVENT_TIME FROM DUAL;
+RESULTS: 40 8:30:0.032250000
+
+SELECT TO_YMINTERVAL('04-06') EVENT_TIME FROM DUAL;
+RESULTS: 4-6
   
   
   

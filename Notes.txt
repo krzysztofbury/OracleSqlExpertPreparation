@@ -201,3 +201,17 @@ Format Models: HH, MM - months, MI, SS, RR - year
 * CASE expression1 WHEN condition1 THEN result1 WHEN condition2 THEN result2 ... ELSE result_other END
 * NULLIF(e1,e2) if e1 is equal to e2 result will be NULL otherwise e1
 
+/* CONVERSION FUNCTIONS */
+* TO_NUMBER(e1, format_model, nls_parms)
+* TO_CHAR(c)
+- TO_CHAR(n,format_model,nls_parms)
+- TO_CHAR(d,format_model,nls_parms) 
+	- FM in format will clean up trailing blanks
+	- Changing the format masks to mixed case sends message to mix-case the output as well 
+	- TH idicator will append wjatever is apprpriate after the date - for 1 it will be 1st 
+* TO_DATE(c,format_model,nls_parms)
+* TO_TIMESTAMP(c,format_model,nls_parms)
+* TO_TIMESTAMP_TZ
+* TO_DSINTERVAL(sql_format,nls_parms) - sql_format is a character string in the format reequired for a INTERVAL DAY TO SECOND datatype which is "DAYS HH24:MI:SS.FF"
+* TO_YMINTERVAL('y-m')
+
