@@ -116,6 +116,22 @@ Other Ways of Adding a Constraint
 * 'A' is less than 'Z', 'Z' is less than 'a', '2' is greater than '10' when comparing characters
 * "later" dates are "greater" dates
 * In Like the string with wildcards must occur after the reserved word LIKE not before (is won't follow syntacticall error but won't work as it should)
+* BOOLEAN OPERATORS PRECEDANCE: NOT is evaluated first, AND is second and is evaluated before OR !!!!
+* BETWEEN and AND statement is INCLUSIVE!!!
+* Condition that ends up as "anything = NULL", the answer will always be FALSE, and you'll never get a row - even if the "anything" is NULL itself
 
+/* ORDER BY */
+* NULL values after order by are presented last -NULL value is considered the highest value
+* Expressions are also available in ORDER BY clause
+* Reference by position - example: ORDER BY 5 - sort rows according to information that is included in the SELECT list
+* In reference by position if position specified doesn't exist will produce a SQL error 
+* It is possible to combine ORDER BY name, position, alias
 
+/* ALIASES */
+* AS is optional
+* Double quotes it can include spaces and other special characters, if it is not enclosed in double quotes standard naming objects rules apply
+* Alias can be referenced within the ORDER BY clause, but nowhere else such as WHERE, GROUP BY or HAVING!!!!
 
+/* FUNCTIONS */
+* Single row functions - scalar functions 
+* Aggregate functions (GROUP BY)

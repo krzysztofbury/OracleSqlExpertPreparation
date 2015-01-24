@@ -1,0 +1,17 @@
+SELECT 
+	PORT_NAME
+  FROM PORTS
+ WHERE CAPACITY NOT BETWEEN 3 AND 4;
+ 
+SELECT 
+	PORT_NAME
+  FROM PORTS
+ WHERE NOT CAPACITY BETWEEN 3 AND 4;
+ 
+ /* ^ Both selects are equal */
+ 
+ /* Valid Example with Order By */
+   SELECT *
+     FROM PROJECTS
+ ORDER BY PROJECT_COST / DAYS; 
+ 
