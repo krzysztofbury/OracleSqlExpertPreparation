@@ -75,6 +75,11 @@ Other Ways of Adding a Constraint
 * (... create table) CONSTRAINT SHIPS_PORTS_FK FOREIGN KEY (HOME_PORT_ID) REFERENCES PORTS (PORT_ID));
 - Foreign Key doesn't require value to exist NOT NULL have to specified for such cause
 
+/* DUAL */
+* Table with column called DUMMY which datatype is VARCHAR2(1)
+* Contains 1 row 
+* That row has a value in DUMMY of 'X'
+
 /* INSERT */
 * If we are inserting data to all of tables columns in the same order as they are in the DB we can ommit inserting columns names into the statement
 * Avoid "implicit datatype conversion", user "explicit datatype conversion"
@@ -135,3 +140,64 @@ Other Ways of Adding a Constraint
 /* FUNCTIONS */
 * Single row functions - scalar functions 
 * Aggregate functions (GROUP BY)
+* Built in 
+* User defined
+* Some functions take no parameters
+* The escape character that activates, or enables a single quote character to be displayed is a single quote
+
+/* CHARACTER FUNCTIONS */
+* CONCAT(s1,s2) or || - CONCAT takes only 2 parameters
+* INITCAP(s1) - Initial capital INITCAP('TEST') > Test
+* LENGTH(s1)
+* RPAD(s1,n,s2), LPAD(s1,n,s2) - pad the left or right of the character s1 with character s2 so that s1 is n characters long - s2 is optional and by default is a single blank space
+* RTRIM (s1,s2), LTRIM (s1,2) - s2 optional - removes occurence of s2 - default space - from s1
+* TRIM - LEADING, TRAILING, BOTH - default BOTH example: TRIM(TRAILING '-' FROM 'TEST---------') > TEST
+* INSTR(s1,s2,starting_position,occurence) - locate a string within a string, starting_positon - optional, default 1, occurence - of s2 to locate, optional default 1, if occurence is negative search brom last to first character
+* SUBSTR(s1,position,length)
+* REPLACE(s1,what_to_replace,replace_with)
+* UPPER(s1), LOWER(s1)
+* SOUNDEX(s1) - translates a source string into its SOUNDEX code - three digits should be generated
+
+Letter			SOUNDEX Code
+B,F,P,V				1
+C,G,J,K,Q,S,X,Z		2
+D,T					3
+L					4
+M,N					5
+R					6
+All other letters	IGNORED
+
+/* NUMBER FUNCTIONS */
+* SIN, ASIN, SINH
+* COS, ACOS, COSH
+* TAN, ATAN, ATAN2, TANH
+* ABS
+* SIGN
+* SQRT - square of number
+* ROUND(n,i), TRUNC(n,1) - n required, i optional default 0, if i is positive n is rounded, truncated to i places to the right of the decimal point, if i is negative n is rounded, truncated to i places to the left of the decimal point
+- If i is ommitted ROUND and TRUNC, returns a value in the same numeric datatype as n. If i is specfied, ROUND returns a datatype of NUMBER
+* REMAINDER(n1,n2) - n1,n2 both required - identifies the closest integer that is a multiple of n2, and return the difference between those two values
+* MOD(n1,n2) - same as REMAINDER but uses FLOOR instead of ROUND
+ 
+/* DATE FUNCTIONS */
+* SYSDATE, SYSTIMESTAMP
+* ROUND(d,i), TRUNC(d,i) - i is optional by default is rounded,truncated to nearest HOUR, 
+
+Format Models: HH, MM - months, MI, SS, RR - year
+
+* Substraction of 2 dates will result in difference in days between this dates
+* MONTHS_BETWEEN(d1,d2)
+* ADD_MONTHS(d,n) - ADD_MONTHS('31.01.2014',1) or ADD_MONTHS('31.01.2014',-1)
+* NEXT_DAY(d,c) - d specified date, c - required specifies day of week
+* LAST_DAY(d) - returns the last day of the month in which d falls
+* NUMTOYMINTERVAL(n,interval_unit) - interval_unit may be 'YEAR' or 'MONTH' - transform the number n into a value that represents the interval_unit amount of time
+* NUMTODSINTERVAL(n,interval_units) - interval_units may be 'DAY', 'HOUR', 'MINUTE' or 'SECOND' - converts the numeric value into an interval of time according to the value of interval_unit
+
+/* OTHER FUNCTIONS */
+* NVL(e1,e2)
+* COALESCE(e1,e2, ... , eN)
+* DECODE(e,search_expression,d) - d is optional
+- In DECODE, two NULL values are considered to be equivalent, NULL compared to NULL will produce TRUE
+* CASE expression1 WHEN condition1 THEN result1 WHEN condition2 THEN result2 ... ELSE result_other END
+* NULLIF(e1,e2) if e1 is equal to e2 result will be NULL otherwise e1
+
