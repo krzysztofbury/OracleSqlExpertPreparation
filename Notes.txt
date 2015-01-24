@@ -131,6 +131,7 @@ Other Ways of Adding a Constraint
 * Reference by position - example: ORDER BY 5 - sort rows according to information that is included in the SELECT list
 * In reference by position if position specified doesn't exist will produce a SQL error 
 * It is possible to combine ORDER BY name, position, alias
+* If GROUP BY is specified columns in ORDER BY must be part of SELECT statement
 
 /* ALIASES */
 * AS is optional
@@ -195,14 +196,17 @@ Format Models: HH, MM - months, MI, SS, RR - year
 
 /* OTHER FUNCTIONS */
 * NVL(e1,e2)
+* NVL2(e1,e2,e3) - if e1 is null, then NVL2 returns e3, else return e2
 * COALESCE(e1,e2, ... , eN)
 * DECODE(e,search_expression,d) - d is optional
 - In DECODE, two NULL values are considered to be equivalent, NULL compared to NULL will produce TRUE
 * CASE expression1 WHEN condition1 THEN result1 WHEN condition2 THEN result2 ... ELSE result_other END
 * NULLIF(e1,e2) if e1 is equal to e2 result will be NULL otherwise e1
+* LEAST(e1,e2, ... , eN)
+* GREATEST(e1,e2, ... , eN)
 
 /* CONVERSION FUNCTIONS */
-* TO_NUMBER(e1, format_model, nls_parms)
+* TO_NUMBER(e1,< format_model, nls_parms)
 * TO_CHAR(c)
 - TO_CHAR(n,format_model,nls_parms)
 - TO_CHAR(d,format_model,nls_parms) 
@@ -215,3 +219,118 @@ Format Models: HH, MM - months, MI, SS, RR - year
 * TO_DSINTERVAL(sql_format,nls_parms) - sql_format is a character string in the format reequired for a INTERVAL DAY TO SECOND datatype which is "DAYS HH24:MI:SS.FF"
 * TO_YMINTERVAL('y-m')
 
+/* MANAGE DATA IN DIFFERENT TIME ZONES */
+* 3 time zones to be concerned
+- UTC time - Universal Standard TIME, - Coordinated Universal Time is the new name for Greenwich Mean Time (GMT) 
+- Database time zome - can be checked with DBTIMEZONE
+- Session time zone - can be checked with SESSIONTIMEZONE
+
+ALTER DATABASE SET TIME_ZONE = 'Europe/Zurich';
+* You cannot change the database time zone if the database already contains any tables with columns of the TIMESTAMP WITH LOCAL TIME ZONE datatype
+ALTER SESSION SET TIME_ZONE = 'America/Los_Angeles';
+
+* Central Daylight Time (UTC-5)
+* Central Standard Time (UTC-6)
+* Eastern Standard Time (UTC-5)
+* Local Mean Time (UTC-6)
+
+/* TIME ZONE OFFSET */
+* +/- TZH:TZM example: -05:00
+
+/* TIME ZONE FUNCTIONS */
+* DBTIMEZONE - Oracle officially recommends that the database time zone be set to UTC, in order to speed performance by avoiding unnecessary time zone calculations
+* SESSIONTIMEZONE
+* CURRENT_DATE
+* CURRENT_TIMESTAMP(t) - t- local time zone's fractional second precision, default 6 range between 0 and 9
+* LOCALTIMESTAMP(t) - t- local time zone's fractional second precision, default 6 range between 0 and 9
+* SYSTIMESTAMP
+* NEW_TIME (d,t1,t2) - converts date from t1 timezone to t2 timezone
+
+/* TIME ZONE CONVERSION FUNCTIONS */
+* FROM_TZ(ts,tz) - ts is a TIMESTAMP, tz is a time zone reference, function transforms ts value and tz character value representing the time zone into a value of the datatype TIMESTAMP WITH TIME ZONE
+* tO_TIMESTAMP_TZ(c,format_model,nls_parms) - format_model must define the format of c corresponding to TIMESTAMP WITH TIME ZONE format model elements - optional, the default requirement is that c must be in the TIMESTAMP format
+
+!!! There isn't a conversion function that specifically converts values into the TIMESTAMP WITH LOCAL TIME ZONE datatype - USE CAST
+
+/* CAST */
+* CAST(e AS d) - e - expression, d is a datatype, useful for converting datetime information into datetime formats like TIMESTAMP WITH LOCAL TIME ZONE
+
+/* EXTRACT */
+* EXTRACT (fm FROM e) - fm is a format model element, e is a timestamp expression, for format model element look on attached pictues
+
+* SYS_EXTRACT_UTC(dtz) - dtz is any datetime value with a time zone included - extracts the UTC from a datetime value
+
+/* AT TIME ZONE */
+SELECT TO_TIMESTAMP('2012-MAY-24 02:00:00','RRRR-MON-DD HH24:MI:SS') 
+	   AT TIME ZONE DBTIMEZONE AS "DB Time"
+  FROM DUAL;
+RESULTS: 24-MAY-12 06.00.00.000000000 AM +00:00
+* Target of AT TIME ZONE can be:
+	- DBTIMEZONE
+	- SESSIONTIMEZONE  
+	- Valid time zone name (eg. 'America/Chicago')
+	- Time zone offset ('hh:mm' format eg. '+04:00')
+	- An expression that produces anyof the preceding values
+* AT TIME ZONE keyword can be preceded by the datatypes 
+	- TIMESTAMP
+	- TIMESTAMP WITH TIME ZONE
+	- TIMESTAMP WITH LOCAL TIME ZONE
+	- !!!!! NOT DATE
+	
+/* AT LOCAL */
+* Converts the source data into the local time equivalent 
+SELECT FROM_TZ(
+			CAST(
+				TO_DATE('2012-MAY-24 02:00:00','RRRR-MON-DD HH:MI:SS') AS TIMESTAMP
+				), 'America/Los_Angeles'
+			) AT LOCAL AS "East Coast Time"
+  FROM DUAL;
+RESULTS: 24-MAY-12 06.00.00.000000000 AM AMERICA/NEW_YORK
+
+/* AGGREGATE/GROUP FUNCTIONS */
+* !!! Two level deep is the furthest one can go with nested aggregate functions (eg. COUNT(AVG(MAX(SQ_FT))) will execute with error)
+* !!! Each time you introduce an aggregate function, you are "rolling up" lower level data into higher-level summary data
+* !!! Your SELECT statement's select list must always respect the level of aggregation and can only include expressions that are all at the same level of aggregation
+* Can be called from 4 different places: SELECT LIST, GROUP BY, HAVING, ORDER BY 
+
+* COUNT(e1) - number of occurences of non-NULL values
+- COUNT(COLUMN_NAME) - count of all not null values on COLUMN_NAME
+- !!! In rare situation where a row contains nothing but NULL values, COUNT(*) will still count that row
+- !!! COUNT will never return a NULL value, if it encounters no values at all, it will at least return a value of 0
+- !!! COUNT(DISTINCT COLUMN_NAME), COUNT(ALL COLUMN_NAME) - DISTINCT and/or ALL cannot be used with the asterisk
+
+* SUM(e1) - e1 is expression with numeric datatype
+- MEDIAN ignores NULL values
+
+* MIN(e1), MAX(e1) - e1 is expression with character, date or number datatype
+- MIN, MAX ignores NULL values
+
+* AVG(e1) - e1 is expression with numeric datatype
+- AVG ignores NULL values
+- AVG(DISTINCT e1), AVG(ALL e1) is available
+
+* MEDIAN(e1) - e1 is expression with numeric datatype - MEDIAN will srot the values, and take the middle one (or AVG of 2 middle ones when there is even amount of numbers)
+- MEDIAN ignores NULL values
+
+* RANK(c1,c2, ... , cN) WITHIN GROUP (ORDER BY e1,e2, ... , eN) - c1 constant, e1 expression of numeric or character datatype
+- !!! Datatypes of c1 and e1 must be the same
+- calculates the tank of a value within a group of values 
+- !!! Ranks may not be consecutive numbers (if 3 rows are tied their rank will be 1 4th row will have rank 4)
+
+* FIRST, LAST
+- aggregate_function KEEP (DENSE_RANK FIRST/LAST ORDER BY e1) - e1 is numeric or character datatype
+- For given range of sorted values, return either the first value (FIRST) or the last value (LAT) of the population of rows defining e1
+
+/* GROUP BY */
+* GROUP BY identifies subsets of rows within the larger set of rows being considered by the SELECT statement
+- Only items allowed in the select list of a SELECT that includes a GROUP BY clause are
+	- Expressions that are specified in the GROUP BY
+	- AGGREGATE functions
+- Expressions that are specified in the GROUP BY do not have to be included in the SELECT statement's select list
+
+/* HAVING */
+* HAVING clause can exclude specific groups of rows defined in the GROUP BY clause
+* HAVING is only allowed with a GROUP BY clause. HAVING and GROUP BY may occur in either order
+* HAVING can only compare expressions that reference groups as defines in the GROUP BY clause and aggregate functions
+* HAVING can include scalar functions as long as these restrictions are respected
+* HAVING should be used only in case of restricting groups of data 
