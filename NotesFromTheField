@@ -334,3 +334,173 @@ RESULTS: 24-MAY-12 06.00.00.000000000 AM AMERICA/NEW_YORK
 * HAVING can only compare expressions that reference groups as defines in the GROUP BY clause and aggregate functions
 * HAVING can include scalar functions as long as these restrictions are respected
 * HAVING should be used only in case of restricting groups of data 
+
+/* JOINS */
+* Equijoins connect data by looking for common data among the tables columns
+* Non-equijoins connect data by looking for relationships that don't involve equality, such as "less than" or "greater than" relationships, or situations where data in one table is within a range of values in another.
+* [INNER] JOIN TABLE1 ON COL.TAB1 = COL.TAB2 same we can achive with TABLE1, TABLE2 WHERE COL.TAB1 = COL.TAB2
+* [OUTER] JOIN 
+	- LEFT [OUTER] JOIN
+	- RIGHT [OUTER] JOIN
+	- FULL [OUTER] JOIN
+* When writing any query in which a column reference is ambigous, you must do something to identify the column clearly to the SQL statement. Otherwise, you'll get an error message and the SQL statement won't execute.	
+
+* NATURAL JOIN (eg. FROM TABLE_A NATURAL JOIN TABLE B) - when in both tables we have the same field (named in the same way)
+- Natural join is an inner join 
+- Natural join will not cause ambigious column definition on joining key - there is no need for aliases, moreover aliases will cause error.
+- Natural join approach tells SQL to locate any columns in the two tabls with a common name, and use them to join the tables
+
+* USING - depends on the presence of identically named columns in the JOIN
+- USING can be used with both inner and outer joins (eg. FROM TABLE_A LEFT JOIN TABLE_B USING (COLUMN_NAME))
+- Table prefix for column used in USING is not allowed , in case of outer joins values used for this column may be from one table or the other depending on the row
+
+* NON-EQUIJOIN
+SELECT S.SCORE_ID, S.TEST_SCORE, G.GRADE
+  FROM SCORES S 
+  JOIN GRADING G ON S.TEST_SCORE BETWEEN G.SCORE_MIN AND G.SCORE_MAX;
+  
+/* SELF JOIN / RECURSIVE JOINS */
+* A self-join is a table that is joined to itself
+* Self-joins can use all the same variations on join criteria that any other table join can use (can be inner or outer joins)
+* Typically one column in the table is joined to a different column in the same table
+
+/* CARTESIAN PRODUCT - CROSS JOIN*/
+* A Cartesian product occurs when two or more tables are included in a SELECT statement without a join condition
+* SQL in care of Cartesian Join will connect each row in one table with every row in the other table
+
+Examples: 
+SELECT *
+  FROM TABLE_A, TABLE_B
+----
+SELECT *
+  FROM TABLE_A CROSS JOIN TABLE_B
+
+/* SEMI JOIN ~ EXISTS / NOT EXISTS */
+* Query with EXIST clause is sometimes referred to as a semijoin
+* Semijoin is a SELECT statement that uses the exists keyword to compare rows in a table with rows in another table
+  
+/* SUBQUERIES */
+* Available in SELECT, INSERT, UPDATE, DELETE  also can be used in CREATE TABLE or CREATE VIEW   
+* Subqueries can be used to solve a variety of problems:
+- Complex multistage queries
+- Creating populated tables
+- Large data set manipulation
+- Creating named views
+- Dynamic view definition
+- Dynamic expression definition with scalar subqueries
+* There is a limit of 255 nested subqueries
+
+* A scalar subquery returns one row with one column. In other words, it returns one column of data within one row, all the time.
+- Scalar subqueries must always be enclosed in parentheses
+- Scalar subqueries cannot be used in the following locations:
+	- In CHECK constraints
+	- In GROUP BY clauses
+	- In HAVING clauses
+	- In a function-based index
+	- As a DEFAULT value for a column
+	- In the RETURNING clause of any DML statement
+	- In the WHEN conditions of CASE
+	- In the START WITH and CONNECT BY clauses
+
+* Correlated subquery is a query that is integrated with a parent query
+- Correlated subqueries is include references to elements of a parent query, and thus, they do not exist as standalone queries
+- Correlated subqueries can exist in SELECT, UPDATE and DELETE 
+	- UPDATE can have correlated subquery in SET and WHERE clause
+	- DELETE can have correlated subquery in WHERE clause
+
+
+
+/* MULTIROW SUBQUERY - ANY, SOME, ALL, IN, NOT */
+* IN - Compares a subject value to a set of values. Return TRUE if the subject value equals any of the values in the set.
+Returns FALSE if the subquery returns no rows.
+* NOT - Used with IN to reverse the result. Returns TRUE if the subquery returns no rows.
+* ANY - Used in combination with single-row comparison conditions (such as = or >) to compare a subject value with 
+a multirow subquery. Returns TRUE if the subject value finds a match consistent with the comparison operator in any of the
+rows returned by the subquery. Returns FALSE if the subquery returns no rows.
+* SOME - Same as ANY
+* ALL - Used in combination with single-row comparison conditions to compare a subject value with a multirow subquery.
+Return TRUE if the subject value finds a match consistent with the comparison operator in all of the rows returned by 
+the subquery. Return TRUE if the subquery returns no rows.
+
+/* MULTIPLE COLUMN SUBQUERY EXAMPLE */
+SELECT EMPLOYEE_ID
+  FROM EMPLOYEES
+ WHERE (FIRST_NAME, LAST_NAME) IN
+ 				(SELECT FIRST_NAME, LAST_NAME
+ 				   FROM CRUISE_CUSTOMERS)
+   AND SHIP_ID = 1;
+
+Syntax rules:
+* The multiple-column list of the parent query is enclosed in parentheses
+* The columns are separated by commas
+* The datatypes of the columns must match
+
+/* WITH */
+* Oracle SQL treats a named query within the WITH clause as a temporary table or as an inline view
+WITH
+	NAME AS (
+		SELECT 1 FROM DUAL
+	),
+	NAME2 AS (
+		SELECT 2 FROM DUAL
+	)
+SELECT
+	1
+  FROM NAME 
+ WHERE 1 = (SELECT 2 FROM NAME2);
+   
+   
+/* VIEWS */ 
+Syntax rules:
+* The keywords CREATE VIEW
+* The optional keywords OR REPLACE
+* Name of view
+* The keyword AS
+* SELECT statement with few restrictions:
+	- Complex columns in SELECT must have ALIASES !!!
+* You can create constraints on a view in the same way as in the table (Note: Oracle doesn't enforce them without special configuration that's available primarily to support certain DWH requirements)
+* You can use INSERT, UPDATE or DELETE on the view, if the view contains enough information to satisfy all of the constraints in any underlying tables
+- Restrictions:
+	- Omission of any required columns in that underlying table
+	- GROUP BY or any other aggregation, such as set operators or hierarchical queries
+	- View that is based on aggregate rows will not be updatable
+	- DISTINCT (UNIQUE)
+	- A FROM clause that references more than on table (subqueries, or most joins - with joins this is not exactly true)
+* ALTER VIEW used to: 
+	- Create, modify or drop constraints on a view
+	- Recompile an invalid view (ALTER VIEW VIEW_NAME COMPILE;)
+
+/* INLINE VIEW */
+* Inline view is a subquery that is contained within a larger SELECT in a way that it replaces the FROM clause of a SQL
+* There is no limit to the number of inline views you can nest within inline views
+
+/* SEQUENCE */
+* Sequence is an object that is predominantly used for one purpose: to generate data for primary key columns in tables.	
+* CREATE SEQUENCE SEQUENCE_NAME SEQUENCE_OPTIONS:
+- SEQUENCE_OPTIONS:
+	- INCREMENT BY integer (default 1, negative numbers means that sequence will descend)
+	- START WITH integer (default MINVALUE or MAXVALUE when descending, or when not specified from 1)
+	- MAXVALUE integer 
+	- NOMAXVALUE
+	- MINVALUE integer
+	- NOMINVALUE
+	- CYCLE -when the sequence generator reaches one end of its range, restart at the other end
+	- NOCYCLE - whn the sequence generator reaches the end of its range stop generating numbers (default option)
+* SEQUENCE_NAME.NEXTVAL
+* SEQUENCE_NAME.CURRVAL
+	- You cannot invoke CURRVAL in first reference to a sequence within a given session. NEXTVAL must be the first reference.
+	- If statement with NEXTVAL fails to execute, sequence will still advance to the next number
+	- You cannot invoke CURRVAL or NEXTVAL in the DEFAULT cluase of a CREATE TABLE or ALTER TABLE
+	- You cannot invoke CURRVAL or NEXTVAL in the subquery of a CREATE VIEW, nor of a SELECT, UPDATE or DELETE
+	- In SELECT CURRVAL or NEXTVAL cannot be combined with DISTINCT
+	- You cannot invoke CURRVAL or NEXTVAL in the WHERE clause of a SELECT
+	- You cannot invoke CURRVAL or NEXTVAL in a CHECK constraint
+	- You cannot invoke CURRVAL or NEXTVAL with the set operators (UNION, MINUS, INTERSECT)	
+
+/* INDEXES */
+* Index cannot be created on LOB or RAW columns	
+* Implicit index creation: index is created as part of PRIMARY KEY or UNIQUE constraints
+* CREATE INDEX INDEX_NAME ON TABLE_NAME (COLUMN_NAME / COLUMNS_NAMES);
+
+
+	- 
