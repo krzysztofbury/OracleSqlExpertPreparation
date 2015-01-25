@@ -70,10 +70,85 @@ Other Ways of Adding a Constraint
 !! FOREIGN KEY referenced table is not actually required to have a PRIMARY KEY but only a UNIQUE constraint on the referenced columns
 !! CHECK any valid SQL expression may be used in a CHECK constraint  
 !! UNIQUE, PRIMARY KEY and FOREIGN KEY constraints can't be set for BLOB, CLOB and TIMESTAMP WITH TIME ZONE data types
+
+* Examples of situations in which you need to drop and recreate a constraint include:
+- Adding or removing columns to the column list of a PRIMARY KEY, FOREIGN KEY or UNIQUE constraint
+- Changing the logic of a CHECK constraint
+- Changing the table that a FOREIGN KEY constraint references
+
+/* MODIFY */
+* The syntax rules for the MODIFY clause are similar to - but not identical to - the ADD clause:
+- You can modify the datatype, DEFAULT status or constraint
+- Only one such element is required in any MODIFY clause
+- You can include multiple elements in any one MODIFY clause provided you define them in the proper order
+ 
+ /* RENAME COLUMN */
+ * ALTER TABLE TABLE_NAME RENAME COLUMN COLUMN_NAME TO NEW_COLUMN_NAME;
+ 
+ /* DROP COLUMN */
+ * When dropping 1 column:
+ - ALTER TABLE TABLE_NAME DROP COLUMN COLUMN_NAME; (also can be ALTER TABLE TABLE_NAME DROP (COLUMN_NAME);)
+ * When dropping more than 1 column:
+ - ALTER TABLE TABLE_NAME DROP (COLUMN_NAME, COLUMN_NAME2);
+ * Without clause CASCADE CONSTRAINTS dropping columns that are on PRIMARY KEY or FOREIGN KEY list is impossible
+ - Example: ALTER TABLE TABLE_NAME DROP COLUMN PK_COLUMN CASCADE CONSTRAINTS; 
+ 	- This query will drop PK_COLUMN and PRIMARY KEY constraint
+
+/* UNUSED COLUMNS */
+* UNUSED column is never again avilable 
+* When setting UNUSED constraints and indices on the column will also be dropped
+* Once a column has been set to UNUSED, it can never be recovered 	
+* UNUSED column will still count as part of the 1000 columns limit 
+* SET UNUSED is much faster than DROPPING can be used in PROD environments
+* Table still must have at least one valid column at any time - so one cannot set all of its columns to UNUSED
+* One cannot recover unused columns, nor can identify them 
+- ALTER TABLE TABLE_NAME SET UNUSED COLUMN COLUMN_NAME;
+- ALTER TABLE TABLE_NAME SET UNUSED (COLUMNS_LIST);
+- ALTER TABLE TABLE_NAME DROP UNUSED COLUMNS;
+
+/* DROPPING CONSTRAINTS */
+* PRIMARY KEY 
+	- ALTER TABLE TABLE_NAME DROP PRIMARY KEY OPTIONS;
+		- CASCADE - this drops any dependent constraints as well
+		- KEEP INDEX / DROP INDEX - default is DROP INDEX
+* UNIQUE
+- You don't need the name of the constraint, just the list of columns that are included in the constraint
+	- ALTER TABLE TABLE_NAME DROP UNIQUE (COLUMN!, COLUMN2 ,...) OPTIONS;	
+* GENERAL
+	- ALTER TABLE TABLE_NAME DROP CONSTRAINT CONSTRAINT_NAME OPTIONS;
+		- Only option is CASCADE;
+* NOT NULL
+	- ALTER TABLE TABLE_NAME MODIFY COLUMN_NAME NULL;	
+
+/* DISABLE CONSTRAINT */
+* ALTER TABLE TABLE_NAME DISABLE VALIDATE_EXPRESSION CONSTRAINT_EXPRESSION;
+- PRIMARY KEY require that you merely identify the constraint as PRIMARY KEY
+- UNIQUE constraint require you to identify the columns that are constrained
+- All other constraints require you to identify the columns that are constrained
+		
+/* ENABLE CONSTRAINT */
+* ALTER TABLE TABLE_NAME ENABLE CONSTRAINT CONSTRAINT_NAME;
+* ENABLE statement cannot have CASCADE
+- Each constraint should be ENABLED individually
  
 /* FOREIGN KEY */
 * (... create table) CONSTRAINT SHIPS_PORTS_FK FOREIGN KEY (HOME_PORT_ID) REFERENCES PORTS (PORT_ID));
 - Foreign Key doesn't require value to exist NOT NULL have to specified for such cause
+* ON DELETE CASCADE - remove row from TABLE_A and dependent rows from child TABLE_B 
+- ALTER TABLE TABLE_NAME ADD CONSTRAINT_NAME FOREIGN KEY (COLUMN_NAME) REFERENCES TABLE_NAME (COLUMN_NAME) ON DELETE CASCADE;
+* ON DELETE SET NULL 
+
+/* CONSTRAINT DEFERRABLE */
+* Can be set for current session
+* Default setting for constraints is NOT DEFERRABLE
+* SET CONSTRAINT CONSTRAINT_NAME DEFERRED / SET CONSTRAINT ALL DEFERRED;
+* ALTER TABLE TABLE_NAME ADD CONSTRAINT CONSTRAINT_NAME DEFERRABLE;
+* When commit event occurs constraint automatically changes state from DEFERRED to IMMEDIATE and the constraints will be validated and applied
+- If any are violated all data is rolled back
+* SET CONSTRAINT CONSTRAINT_NAME IMMEDIATE / SET CONSTRAINT ALL IMEDIATE;
+
+/* CONSTRAINT RENAMING */
+* ALTER TABLE TABLE_NAME RENAME CONSTRAINT PREVIOUS_NAME TO NEW_NAME;
 
 /* DUAL */
 * Table with column called DUMMY which datatype is VARCHAR2(1)
@@ -327,6 +402,8 @@ RESULTS: 24-MAY-12 06.00.00.000000000 AM AMERICA/NEW_YORK
 	- Expressions that are specified in the GROUP BY
 	- AGGREGATE functions
 - Expressions that are specified in the GROUP BY do not have to be included in the SELECT statement's select list
+* The GROUP BY clause is processed by SQL before the select list. Therefore it doesn't recognize column aliases created in the select list - this applies to ROLLUP and CUBE as well.
+
 
 /* HAVING */
 * HAVING clause can exclude specific groups of rows defined in the GROUP BY clause
@@ -409,7 +486,6 @@ SELECT *
 	- DELETE can have correlated subquery in WHERE clause
 
 
-
 /* MULTIROW SUBQUERY - ANY, SOME, ALL, IN, NOT */
 * IN - Compares a subject value to a set of values. Return TRUE if the subject value equals any of the values in the set.
 Returns FALSE if the subquery returns no rows.
@@ -469,6 +545,7 @@ Syntax rules:
 * ALTER VIEW used to: 
 	- Create, modify or drop constraints on a view
 	- Recompile an invalid view (ALTER VIEW VIEW_NAME COMPILE;)
+* If INVISIBLE column will be specified as part of SELECT list it will be available in VIEW
 
 /* INLINE VIEW */
 * Inline view is a subquery that is contained within a larger SELECT in a way that it replaces the FROM clause of a SQL
@@ -501,6 +578,144 @@ Syntax rules:
 * Index cannot be created on LOB or RAW columns	
 * Implicit index creation: index is created as part of PRIMARY KEY or UNIQUE constraints
 * CREATE INDEX INDEX_NAME ON TABLE_NAME (COLUMN_NAME / COLUMNS_NAMES);
+* Index will not be invoked when:
+	- A "not equals" comparison is used
+	- Wildcard is leading position in LIKE statement
+	- If index is not function based, column used inside of function will not be taken by index
+* Unique index - is one that helps ensure that a column in a table will contain unique information
+- CREATE UNIQUE INDEX INDEX_NAME ON TABLE_NAME (COLUMN_NAME);
+* DROP INDEX INDEX_NAME
+- If the table upon which an index is based is dropped, index is automatically dropped
+* INVISIBLE: CREATE INDEX INDEX_NAME ON TABLE_NAME (COLUMN_NAME) INVISBLE
+- INVISLBLE index is ignored by the optimizer
+- Unlike unusable indexes, an invisible index is maintained during DML statements
+- ALTER INDEX INDEX_NAME INVISBLE/VISIBLE;
+* MULTIPLE INDEXES on the Same Set Of Columns
+- Prerequisites:
+	 - Only one index on the same set of columns can be visible at any point of time
+	 - If you  are creating a visible index, then any existing indexes on the set of columns must be invisible
 
+/* CREATE TABLE USING INDEX */
+* USING INDEX only works for PRIMARY KEY and UNIQUE
+* The USING INDEX clause for creating indices can be used to specify an existing index by appending a constraint specification with "USING INDEX INDEX_NAME" and nothing else.
 
-	- 
+/* FUNCTION BASED INDEX */
+* A function-based index is an index that is created on one or more columns that are used as one or more input paramters to a function	 
+* Function-based indexes can be uild on any valid expression - they are not limited to functions
+- CREATE INDEX INDEX_NAME ON TABLE_NAME (UPPER(COLUMN_NAME)||'TEST INDEX');
+	 
+/* SYNONYMS */
+* A SYNONYM consists of nothing more than an alternative name (an alias) for another object in the database that may (or may not) already exist.
+* Synonyms can be created for tables, views, sequences and other synonyms
+* PRIVATE: CREATE [OR REPLACE] SYNONYM SYNONYM_NAME FOR TABLE_NAME;
+- a private synonym is owned by the user account that creates it (visible within the user account)
+* PUBLIC: CREATE PUBLIC SYNONYM SYNONYM_NAME FOR TABLE_NAME
+- is owned bt a special system user acoount called PUBLIC
+- available to everyone in the database
+* If you have a synonym for a database object, and the database object is dropped, the synonym is not dropped
+* There is no ALTERE statement for SYNONYMS use OR REPLACE
+* DROP SYNONYM / DROP PUBLIC SYNONYM SYNONYM_NAME;
+
+/* FLASHBACK */
+* !!! ROW MOVEMENT have to be enabled or FLASHBACK won't be executed 
+* Recovering complete tables you may have inadvertently dropped
+* Recovering data changes within one or more tables resulting from a series of DML statements
+* Performing data analysis on data that’s been changed over periods of time
+* Comparing data that existed at one point in time with data that existed at another point in time
+* Performing queries as of a prior time period
+* FLASHBACK TABLE TABLE_NAME, ... , TABLE_NAME TO 
+	- BEFORE DROP
+	- RENAME TO - recovers dropped table to an object with different name
+	- SCN scn_expression
+	- TIMESTAMP timestamp_expression
+	- RESTORE POINT restore_point_expression
+* FLASHBACK cannot be rolled back	
+* FLASHBACK is using Recycle Bin (SELECT * FROM USER_RECYCLEBIN;)
+* PURGE from Recycble bin - PURGE TABLE TABLE_NAME; After this table specified by TABLE_NAME cannot be recovered
+* Data restoration is permanent. It invokes an implicit COMMIT so that the restpred data is committed.
+* You cannot use the FLASHBACK TABLE statement to restore older data to an existing tableif the table has been structurally altered with the ALTER TABLE statement in such a way that it can't accept the full definition of older data.
+* DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER
+* SCN for a given row can be found in the pseudocolumn ORA_ROWSCN
+	- SCN_TO_TIMESTAMP(s1)
+	- TIMESTAMP_TO_SCN(t)
+* RESTORE POINT is an object in the database you create to represent a given moment in the database
+- CREATE RESTORE POINT RESTORE_POINT_NAME;
+- DROP RESTORE POINT RESTORE_POINT_NAME;
+
+/* EXTERNAL TABLES */
+Restrictions:
+* External Table cannot have LOD datatype
+* You cannot add a constraint to an external table
+* You cannot change the column of an external table to UNUSED (If you try, SQL will drop the column)
+* Oracle Directory needs to be created
+- CREATE OR REPLACE DIRECTORY BANK_FILES AS 'PATH_ON_DRIVE'
+* You cannot use INSERT, UPDATE or DELETE statements on external tables
+* External tables can be queried like any table or view in the database
+
+/* SET OPERATORS */
+* UNION (with DISTINCT)
+* UNION ALL (without DISTINCT)
+* INTERSECT (only unique occurences of data in both rowsets)
+* MINUS
+* Number of expressions and datatypes involved must match up
+* Set operators have equal precedence
+* You can user parentheses to override set operator precedence
+* Only one ORDER BY clause is allowed and it must be at the end of the series of SELECT statements and SET operators
+* ORDER BY with SET operators can sort rows by position or reference
+- If by reference, the first SELECT statement's expression names are in effect for the entire series of SELECT statements
+
+/* ADDITIONAL GROUP BY FUNCTIONS */
+* Both ROLLUP and CUBE are an efficient ways to execute a single SQL statement to calculate totals and subtotals for different levels of aggregated data
+* GROUPING is ideal when used in combination with DECODE or string concatenation, or some other SQL function, to process and/or format output that differentiates between aggregate and superaggregate data
+* ROLLUP operation identifies expressions specified in the GROUP BY cluase - defines levels of superaggregation so that subtotals and totals will be computed and displayed in the context of the GROUP BY
+* The CUBE operation calculates and displays subtotals and totals for all combinations of GROUP BY clause expressions
+* GROUPING function returns a number one or zero to each row of output to identify each row as either a regular row or a superaggregate row
+* GROUPING SETS operation specfies sets of GROUP BY clause expressions in various combinations, providing a finer level of access to directing GROUP BY to perform aggregation selectively
+
+/* DATA DICTIONARY VIEW */
+* Insprecting Constraints (Constraint Type):
+	- P = PRIMARY KEY
+	- R = FOREIGN KEY (referential integrity)
+	- U = UNIQUE
+	- C = CHECK or NOT NULL constraint
+* Comments
+- COMMENT ON COLUMN PORTS.CAPACITY IS '';
+- COMMENT ON TABLE PORTS IS '';
+- You can't really drop a comment from the data dictionary. Instead you change it to a blank.
+
+/* HIERARCHICAL QUERIES */
+* START WITH
+* CONNECT BY PRIOR
+* ORDER SIBLINGS BY
+* SYS_CONNECT_BY_PATH
+* CONNECT_BY_ROOT
+
+/* TRUNCATE RECURSIVE */
+* If you specify CASCADE, then ORACLE Database truncates all child tables that reference table with an enabled ON DELETE CASCADE referential constraint. This is a recursive operation that will truncate all child tables, grandchild tables, and so on using the specified options.
+
+/* CROSS_OUTER_APPLY_CLAUSE */
+* CROSS APPLY - returns only rows from the table on the left side of the join that produce a result from the inline view on the right side of the join 
+- Eg. The join returns only the departments that have at least one employee
+* OUTER APPLY - returns all rows from the table on the left side of the join regardless of whether they produce a result from the inline view on the right side of the join
+- Eg. The join returns all departments regardless of whether the departments have any employees
+
+/* PIVOT and UPIVOT */
+* PIVOT
+SELECT ...
+  FROM ...
+ PIVOT (
+ 	PIVOT_CLAUSE 
+ 	PIVOT_FOR_CLAUSE
+ 	PIVOT_IN_CLAUSE
+ ) 
+  WHERE ...
+
+* UNPIVOT
+ SELECT ...
+   FROM ...
+UNPIVOT INCLUDE NULLS (
+	UNPIVOT_COLUM
+	UNPIVOT_FOR_CLAUSE
+	UNPIVOT_IN_CLAUSE
+)
+ 	
