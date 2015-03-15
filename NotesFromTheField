@@ -641,6 +641,14 @@ Syntax rules:
 * RESTORE POINT is an object in the database you create to represent a given moment in the database
 - CREATE RESTORE POINT RESTORE_POINT_NAME;
 - DROP RESTORE POINT RESTORE_POINT_NAME;
+- SELECT * FROM V$RESTORE_POINT;
+* Getting SCN - SELECT DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER FROM DUAL;
+
+SELECT * FROM USER_RECYCLEBIN = SELECT * FROM RECYCLEBIN;
+* RECYCLEBIN is a synonym for USER_RECYCLEBIN
+* For DBA's there is a DBA_RECYCLEBIN
+* !!! Bitmap indexes are not recovered during FLASHBACK
+* Indexes will be recovered with system-assigned names
 
 /* EXTERNAL TABLES */
 Restrictions:
@@ -682,6 +690,8 @@ Restrictions:
 - COMMENT ON COLUMN PORTS.CAPACITY IS '';
 - COMMENT ON TABLE PORTS IS '';
 - You can't really drop a comment from the data dictionary. Instead you change it to a blank.
+
+
 
 /* HIERARCHICAL QUERIES */
 * START WITH
