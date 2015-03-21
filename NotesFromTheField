@@ -707,8 +707,22 @@ Restrictions:
 - COMMENT ON TABLE PORTS IS '';
 - You can't really drop a comment from the data dictionary. Instead you change it to a blank.
 
+/* PRIVILEGES */
+* USER_SYS_PRIVS - system privileges granted to the current user
+* USER_TAB_PRIVS - granted privileges on objects for which the user is the owner, grantor, or grantee
+* USER_ROLE_PRIVS - roles granted to the current user
+* DBA_SYS_PRIVS - system privileges granted to users and roles
+* DBA_TAB_PRIVS - all grants on objects in the database
+* DBA_ROLE_PRIVS - roles granted to users and roles
+* ROLE_SYS_PRIVS - system privileges granted to roles
+* ROLE_TAB_PRIVS - table privileges granted to roles
+* SESSION_PRIVS - session privileges which the user currently has set
 
-
+/* CTAS - Create table as Select */
+* CTAS statement interpreted the subquery and used the entire set of columnd definitions from the query on INVOICES to build the new table
+- Any CONSTRAINT or INDEX objects or any other supporting objects that might exist for the source table or tables, are not replicated
+- Only explicitly created NOT NULL constraints are copied into the new table, are assigned a system-generated name (NOT NULL from PRIMARY KEY will not be created)
+ 
 /* HIERARCHICAL QUERIES */
 * START WITH
 * CONNECT BY PRIOR
