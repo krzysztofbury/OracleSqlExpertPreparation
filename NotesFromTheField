@@ -674,13 +674,29 @@ Restrictions:
 
 /* ADDITIONAL GROUP BY FUNCTIONS */
 * Both ROLLUP and CUBE are an efficient ways to execute a single SQL statement to calculate totals and subtotals for different levels of aggregated data
+- For every n groups, ROLLUP produces n+1 groupings 
 * GROUPING is ideal when used in combination with DECODE or string concatenation, or some other SQL function, to process and/or format output that differentiates between aggregate and superaggregate data
 * ROLLUP operation identifies expressions specified in the GROUP BY cluase - defines levels of superaggregation so that subtotals and totals will be computed and displayed in the context of the GROUP BY
 * The CUBE operation calculates and displays subtotals and totals for all combinations of GROUP BY clause expressions
+- For n expressions, CUBE returns 2 to the nth power groupings.
 * GROUPING function returns a number one or zero to each row of output to identify each row as either a regular row or a superaggregate row
 * GROUPING SETS operation specfies sets of GROUP BY clause expressions in various combinations, providing a finer level of access to directing GROUP BY to perform aggregation selectively
+- NULL is used in GROUPING SETS to cause a grand total to be calculated and displayed 
 
 /* DATA DICTIONARY VIEW */
+* Types of VIEWs:
+- DICTIONARY
+- USER_, ALL_, DBA_ - is a pattern that is used throught the data dictionary.  Many of the data dictionary views that store information about objects in the database have names that start with one of these three prefixes.
+- V$DATABASE - includes information about the database itself, including the database name, the data created, the current opearting system platform, and much more
+- V$INSTANCE - includes the instance name, the host name, the startup time, and much more
+- V$PARAMETER - the current settings for system parameters, such as NLS_LANGUAGE, NLS_DATE_LANGUAGE, NLS_CURRENCY, NLS_TIME_FORMAT, NLS_TIME_TZ_FORMAT, NLS_TIMESTAMP_TZ_FORMAT, SQL_VERSION
+- V$SESSION - many current settings for each individual user session, showing active connections, login times, machine names that users are logged in to, the current state of transactions
+- V$RESERVED_WORDS - current list of reserved words, including information indicating if the keyword is always reserved or not, and if not, under what circumstances it is reserved
+- V$OBJECT_USAGE - useful for monitoring the usage of INDEX objects
+- V$TIMEZONE_NAMES - includes two columns: TZNAME, which is time zone region, and TZABBREV, which is the time zone abbreviation
+- Only simple queries are recommended when querying the V$ views directly
+- ALL_TAB_COMMENTS - displays comments for all objects in the database
+- ALL_COL_COMMENTS - displays comments for all columns of all tables and views in the database
 * Insprecting Constraints (Constraint Type):
 	- P = PRIMARY KEY
 	- R = FOREIGN KEY (referential integrity)
