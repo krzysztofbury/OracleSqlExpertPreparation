@@ -723,6 +723,12 @@ Restrictions:
 - Any CONSTRAINT or INDEX objects or any other supporting objects that might exist for the source table or tables, are not replicated
 - Only explicitly created NOT NULL constraints are copied into the new table, are assigned a system-generated name (NOT NULL from PRIMARY KEY will not be created)
  
+ /* MULTITABLE INSERTS */
+ * Two types of multitable INSERT
+ - Unconditional - process each of the INSERT statement's one or more INTO clause without condition, for all rows returned by the subquery
+ - Conditional - use WHEN conditions before INTO clauses to determine if the given INTO caluse (or clauses) will execute for a given row returned by the subquery (ELSE clause can include an alternative INTO clause that can be executed if none of the WHEN conditions are found to be true)
+ 
+ 
 /* HIERARCHICAL QUERIES */
 * START WITH
 * CONNECT BY PRIOR
