@@ -727,8 +727,10 @@ Restrictions:
  * Two types of multitable INSERT
  - Unconditional - process each of the INSERT statement's one or more INTO clause without condition, for all rows returned by the subquery
  - Conditional - use WHEN conditions before INTO clauses to determine if the given INTO caluse (or clauses) will execute for a given row returned by the subquery (ELSE clause can include an alternative INTO clause that can be executed if none of the WHEN conditions are found to be true)
- 
- 
+ * If any one INTO clause fails with an execution error for any one row returned by the subquery, then the entire statement fails for all rows of the subquery, and no data change results
+ * Table alias defined in a subquery of a multitable INSERT is not recognized throughout the rest of the INSERT statement
+ * Sequence stated in SUBQUERY will produce an error we can add it to VALUES list but know that attempts to invoke it from the WHEN or INTO clauses of the INSERT may produce udesirable results
+  
 /* HIERARCHICAL QUERIES */
 * START WITH
 * CONNECT BY PRIOR
