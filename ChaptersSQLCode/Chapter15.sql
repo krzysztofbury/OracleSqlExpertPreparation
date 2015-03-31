@@ -39,3 +39,9 @@ WHERE condition;
 
 -- DELETE clause only affects rows that are a result of the completed "UPDATE clause" and remain in the target table - which in this instance is WWA_INVOICES
 
+
+/* FLASHBACK QUERY */
+SELECT *
+  FROM CHAT
+ AS OF TIMESTAMP SYSTIMESTAMP - INTERVAL '0 0:01:30' DAY TO SECOND;
+ 
