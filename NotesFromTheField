@@ -616,40 +616,6 @@ Syntax rules:
 * There is no ALTERE statement for SYNONYMS use OR REPLACE
 * DROP SYNONYM / DROP PUBLIC SYNONYM SYNONYM_NAME;
 
-/* FLASHBACK */
-* !!! ROW MOVEMENT have to be enabled or FLASHBACK won't be executed 
-* Recovering complete tables you may have inadvertently dropped
-* Recovering data changes within one or more tables resulting from a series of DML statements
-* Performing data analysis on data that’s been changed over periods of time
-* Comparing data that existed at one point in time with data that existed at another point in time
-* Performing queries as of a prior time period
-* FLASHBACK TABLE TABLE_NAME, ... , TABLE_NAME TO 
-	- BEFORE DROP
-	- RENAME TO - recovers dropped table to an object with different name
-	- SCN scn_expression
-	- TIMESTAMP timestamp_expression
-	- RESTORE POINT restore_point_expression
-* FLASHBACK cannot be rolled back	
-* FLASHBACK is using Recycle Bin (SELECT * FROM USER_RECYCLEBIN;)
-* PURGE from Recycble bin - PURGE TABLE TABLE_NAME; After this table specified by TABLE_NAME cannot be recovered
-* Data restoration is permanent. It invokes an implicit COMMIT so that the restpred data is committed.
-* You cannot use the FLASHBACK TABLE statement to restore older data to an existing tableif the table has been structurally altered with the ALTER TABLE statement in such a way that it can't accept the full definition of older data.
-* DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER
-* SCN for a given row can be found in the pseudocolumn ORA_ROWSCN
-	- SCN_TO_TIMESTAMP(s1)
-	- TIMESTAMP_TO_SCN(t)
-* RESTORE POINT is an object in the database you create to represent a given moment in the database
-- CREATE RESTORE POINT RESTORE_POINT_NAME;
-- DROP RESTORE POINT RESTORE_POINT_NAME;
-- SELECT * FROM V$RESTORE_POINT;
-* Getting SCN - SELECT DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER FROM DUAL;
-
-SELECT * FROM USER_RECYCLEBIN = SELECT * FROM RECYCLEBIN;
-* RECYCLEBIN is a synonym for USER_RECYCLEBIN
-* For DBA's there is a DBA_RECYCLEBIN
-* !!! Bitmap indexes are not recovered during FLASHBACK
-* Indexes will be recovered with system-assigned names
-
 /* EXTERNAL TABLES */
 Restrictions:
 * External Table cannot have LOD datatype
@@ -730,6 +696,45 @@ Restrictions:
  * If any one INTO clause fails with an execution error for any one row returned by the subquery, then the entire statement fails for all rows of the subquery, and no data change results
  * Table alias defined in a subquery of a multitable INSERT is not recognized throughout the rest of the INSERT statement
  * Sequence stated in SUBQUERY will produce an error we can add it to VALUES list but know that attempts to invoke it from the WHEN or INTO clauses of the INSERT may produce udesirable results
+
+/* FLASHBACK */
+* !!! ROW MOVEMENT have to be enabled or FLASHBACK won't be executed 
+* Recovering complete tables you may have inadvertently dropped
+* Recovering data changes within one or more tables resulting from a series of DML statements
+* Performing data analysis on data that’s been changed over periods of time
+* Comparing data that existed at one point in time with data that existed at another point in time
+* Performing queries as of a prior time period
+* Flashback types:
+	- Flashback Query (FQ) - querying a table as it existed in the past
+	- Flashback Version Query (FVQ) - querying multiple past points at once and comparing rows as they existed at various points in history
+	- Flashback Transaction Query (FTQ) - querying the data dictionary and obtaining a variety of metadata about historical rows in the database - including information about the transaction that caused the most recent changes
+* ORA_ROWSCN pseudocolumn displays the SCN value for the row	
+* FLASHBACK TABLE TABLE_NAME, ... , TABLE_NAME TO 
+	- BEFORE DROP
+	- RENAME TO - recovers dropped table to an object with different name
+	- SCN scn_expression
+	- TIMESTAMP timestamp_expression
+	- RESTORE POINT restore_point_expression
+* FLASHBACK cannot be rolled back	
+* FLASHBACK is using Recycle Bin (SELECT * FROM USER_RECYCLEBIN;)
+* PURGE from Recycble bin - PURGE TABLE TABLE_NAME; After this table specified by TABLE_NAME cannot be recovered
+* Data restoration is permanent. It invokes an implicit COMMIT so that the restpred data is committed.
+* You cannot use the FLASHBACK TABLE statement to restore older data to an existing tableif the table has been structurally altered with the ALTER TABLE statement in such a way that it can't accept the full definition of older data.
+* DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER
+* SCN for a given row can be found in the pseudocolumn ORA_ROWSCN
+	- SCN_TO_TIMESTAMP(s1)
+	- TIMESTAMP_TO_SCN(t)
+* RESTORE POINT is an object in the database you create to represent a given moment in the database
+- CREATE RESTORE POINT RESTORE_POINT_NAME;
+- DROP RESTORE POINT RESTORE_POINT_NAME;
+- SELECT * FROM V$RESTORE_POINT;
+* Getting SCN - SELECT DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER FROM DUAL;
+
+SELECT * FROM USER_RECYCLEBIN = SELECT * FROM RECYCLEBIN;
+* RECYCLEBIN is a synonym for USER_RECYCLEBIN
+* For DBA's there is a DBA_RECYCLEBIN
+* !!! Bitmap indexes are not recovered during FLASHBACK
+* Indexes will be recovered with system-assigned names
   
 /* HIERARCHICAL QUERIES */
 * START WITH
