@@ -696,6 +696,10 @@ Restrictions:
  * If any one INTO clause fails with an execution error for any one row returned by the subquery, then the entire statement fails for all rows of the subquery, and no data change results
  * Table alias defined in a subquery of a multitable INSERT is not recognized throughout the rest of the INSERT statement
  * Sequence stated in SUBQUERY will produce an error we can add it to VALUES list but know that attempts to invoke it from the WHEN or INTO clauses of the INSERT may produce udesirable results
+* Multitable INSERT can only be used with a table not with a VIEW!!!
+* Sequence generators do not behave consistently in a multitable INSERT statement. 
+- Adding sequence generator withing a subquery, will cause a syntax error
+- Including it to the expression list of the INTO statement, may or may not get the functionality that you wish
 
 /* FLASHBACK */
 * !!! ROW MOVEMENT have to be enabled or FLASHBACK won't be executed 
