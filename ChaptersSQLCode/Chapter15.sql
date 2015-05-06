@@ -85,7 +85,7 @@ WHEN NOT MATCHED THEN INSERT (col, col2)
 		where_clause
 WHERE condition;
 
--- DELETE clause only affects rows that are a result of the completed "UPDATE clause" and remain in the target table - which in this instance is WWA_INVOICES
+-- DELETE clause only affects rows that are a result of the completed "UPDATE clause - WHEN MATCHED section" and remain in the target table - which in this instance is WWA_INVOICES
 
 
 /* FLASHBACK QUERY */

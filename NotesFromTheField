@@ -712,6 +712,46 @@ Restrictions:
 	- Flashback Query (FQ) - querying a table as it existed in the past
 	- Flashback Version Query (FVQ) - querying multiple past points at once and comparing rows as they existed at various points in history
 	- Flashback Transaction Query (FTQ) - querying the data dictionary and obtaining a variety of metadata about historical rows in the database - including information about the transaction that caused the most recent changes
+
+SELECT NAME, VALUE
+  FROM V$SYSTEM_PARAMETER
+ WHERE NAME LIKE (’undo%’);
+
+3 rows should be the result of this query:
+* UNDO_MANAGEMENT - set to AUTO indicates that the Automatic Undo Management feature is turned on;
+* UNDO_TABLESPACE - identifies an undo tablespace;
+* UNDO_RETENTION - specified in seconds.
+
+/* Flashback Version Query */
+* Only historically committed changes are returned by the FVQ operation, within the range of time specified, and within the range allowed and supported by flashback operations;
+* using VERSIONS caluse cannot be used querying a view (but creating a view with this clause is possible)
+
+/* FVQ using TIMESTAMP */
+  SELECT *
+    FROM TABLE_NAME
+VERSIONS BETWEEN TIMESTAMP timestamp_expression1
+        AND timestamp_expression2;
+
+-- above query will show any given row once for each of its versions       
+
+/* FVQ using SCN */
+  SELECT *
+ FROM TABLE_NAME
+VERSIONS BETWEEN SCN scn_expression1
+     AND scn_expression2;
+
+/* Flashback Version Query (FVQ) Pseudocolumns */
+* VERSIONS_STARTIME / VERSIONS_STARTSCN - starting time or SCN for when the version of the row was created. If NULL, then the row version was created before the lower time boundary returned by the BETWEEN clause
+* VERSIONS_ENDTIME / VERSIONS_ENDSCN - expiration time or SCN for the version of the row. If NULL, then the row version is still current, or the row version resulted from a DELETE (see VERSIONS_OPERATION)
+* VERSIONS_XID - identifies the transaction that created the row
+* VERSIONS_OPERATION - identifier the operation that performed whatever change created the row version: either I for INSERT, U for UPDATE or D for DELETE
+
+/* FTQ - Flashback Transaction Query */
+DESC FLASHBACK_TRANSACTION_QUERY;
+
+* XID  - global transaction identifier (each transaction that is executed within the database is tracked and assigned a global transaction identifier)
+- XID value is RAW datatype, it can be converted to HEX with RAWTOHEX or back to RAW with HEXTORAW
+
 * ORA_ROWSCN pseudocolumn displays the SCN value for the row	
 * FLASHBACK TABLE TABLE_NAME, ... , TABLE_NAME TO 
 	- BEFORE DROP
