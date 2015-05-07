@@ -781,11 +781,90 @@ SELECT * FROM USER_RECYCLEBIN = SELECT * FROM RECYCLEBIN;
 * Indexes will be recovered with system-assigned names
   
 /* HIERARCHICAL QUERIES */
+* Self-oin connection is established using CONNECT BY and PRIOR
+* PRIOR is critical - it must be placed before one of the two column references. The choice determines if the hierarchy will traverse up the tree or down the tree from the START WITH
+* LEVEL is automatically defined to show the hierarchical level of the row relative to the root node of the hierarchical query
+* To reverse direction in a hierarchical query, move PRIOR to the other side of the equal sign (if you prefix a column name with PRIOR in the select list, this will specify the "prior" row's value)
+
 * START WITH
 * CONNECT BY PRIOR
 * ORDER SIBLINGS BY
 * SYS_CONNECT_BY_PATH
 * CONNECT_BY_ROOT
+
+* Simple ORDER BY may sometimes cause problems at the output, but statement at whole will be syntactically correct
+- In such cases use ORDER SIBLINGS BY clause instead
+* SYS_CONNECT_BY_PATH - useful feature for formatting hierarchical data output (takes two arguments: attribute and separator)
+* CONNECT_BY_ROOT - operator will display any data from the root node row of a given row (it is only valid in hierarchical queries)
+
+
+/* Regular Expression Support */
+* Match Parameter Text Literals - if parameters are used in a conflicting combination, such as 'ic', the last value will take precedence and any prior conflicting values will be ignored.
+* Regular expression are case insensitive by default
+* [[:alpha:]] this is proper way of class handling, [:alpha:] this defines a set of individual characters !!!!!
+* Character classes such as [:alpha:] are preferable to letter ranges such as [a-z] in multilingual environments for consistenct and flexibility in your applications
+
+
+/* Controlling User Access */
+* Type of privileges
+- System - the ability to perform a particular task in the database
+- Object - the ability to perform a particular task on a particular datbase object
+- Role - a collection of one or more system privileges and/or object privileges, and/or other roles
+* Creating user account:
+- CREATE USER username IDENTIFIER BY password;
+* Dropping user:
+- DROP USER username [CASCADE]
+-- CASCADE option directs SQL to drop the user account and all of the objects it owns
+* Granting privileges
+- GRANT privilege TO user option;
+* Revoking privileges
+- REVOKE privilege FROM user;
+* ANY option - ability to modify/create objects in any user account anywhere in the database
+* WITH ADMIN OPTION - recipient receives the system privilege itself, along with the right to grant the system privilege to another user
+(REVOKE statement for system privileges does not "cascade" it only applies to the user to whom the revocation is applied)
+* Granting all privileges to user
+- GRANT ALL PRIVILEGES TO user;
+* Revoking all privileges from user
+- REVOKE ALL PRIVILEGES FROM user; (this statement will reverse all system privileges granted to the user, assuming that all of them have been granted to the user - if not, an error message will result)
+
+* PUBLIC account - is a built-in user account in the Oracle database that represents all users
+- GRANT CREATE ANY TABLE TO PUBLIC; - this will allow any user in the database privilege to create a table in any schema;
+* If you intend to DROP a privilege from a USER, use the data dictionary to determine if that same privilege is granted to a ROLE that is also granted to the same USER (if so, then the privilege will be still granted to the USER indirectly through the ROLE)
+
+/* Data about Privileges in the Data Dictionary */
+* USER_SYS_PRIVS - system privileges granted to current user
+* DBA_SYS_PRIVS - system privileges granted to users and roles
+* USER_TAB_PRIVS - grants on objects for which the user is the grantor, grantee or owner
+* ALL_TAB_PRIVS - grants on objects for which the user is the grantor, grantee, owner or an enabled role or PUBLIC is the grantee
+* DBA_TAB_PRIVS - grants on all objects in the database
+* ALL_TAB_PRIVS_RECD - grants on objects for which the user, PUBLIC, or enabled role is the grantee
+* SESSION_PRIVS - privileges that are enabled to the user
+
+* !!! When inspecting data dictionary views like DBA_TAB_PRIVS or DBA_SYS_PRIVS to see what privileges have been granted to a particular user account, you can check the GRANTEE column for the appropriate USER name. However, don't forget to also check for rows where GRANTEE='PUBLIC'; these privileges are also available to your user account
+
+* Creating ROLE
+- CREATE ROLE TEST_ROLE;
+- GRANT SELECT ON TEST_TABLE TO TEST_ROLE;
+* Granting role
+- GRANT TEST_ROLE TO user [WITH ADMIN OPTION];
+
+/* Data Dictionary views with information about ROLE Objects */
+* DBA_ROLES - all roles that exist in the database
+* DBA_ROLE_PRIVS - roles granted to users and roles
+* DBA_SYS_PRIVS - system privileges granted to users and roles
+* DBA_TAB_PRIVS - all grants on objects to users and roles
+* ROLE_ROLE_PRIVS - roles that are granted to roles
+* ROLE_SYS_PRIVS - system privileges granted to roles
+* ROLE_TAB_PRIVS - table privileges granted to roles
+* SESSION_ROLES - roles that are enabled to the user
+
+* When grant to object was added to a role and then this object was dropped this grant still exists, so in case of re-creation of an object there is no need to once again grant the role to specific user
+
+
+
+
+
+/*************************** ADDITIONAL STUFF FROM 12C *******************************/
 
 /* TRUNCATE RECURSIVE */
 * If you specify CASCADE, then ORACLE Database truncates all child tables that reference table with an enabled ON DELETE CASCADE referential constraint. This is a recursive operation that will truncate all child tables, grandchild tables, and so on using the specified options.
